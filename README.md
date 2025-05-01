@@ -76,3 +76,51 @@ You will be provided with the customer Query:
   "chain_of_thought": "<VERY brief reasoning (≤30 words)>"
 }
 
+# AI-Powered Customer Portal MVP
+
+This project implements a rapid MVP for Zeta's self-service customer portal with AI-powered loan eligibility recommendations. The solution is built with a 24-hour development timeline in mind, focusing on practical implementation choices and smart automation.
+
+## Solution Overview
+
+This MVP provides three core functionalities:
+1. Account balance checking
+2. AI-powered loan eligibility assessment
+3. Dispute management system
+
+## Technical Architecture
+
+### Frontend
+- **Technology**: Streamlit
+- **Features**:
+  - Clean, intuitive UI requiring minimal code
+  - Three functional sections for each core feature
+  - Responsive design with form validation
+  - API integration with backend services
+
+### Backend
+- **Technology**: FastAPI
+- **Features**:
+  - RESTful API endpoints for all functionality
+  - Pydantic models for data validation
+  - Basic AI logic for loan eligibility scoring
+  - In-memory data storage (would be replaced with a database in production)
+
+### AI Component
+The loan eligibility system uses a straightforward but effective algorithm that:
+- Weighs credit score as the primary factor
+- Adjusts based on income level
+- Applies penalties for existing debt
+- Generates human-readable recommendations with specific advice
+
+
+### Running the Backend
+```bash
+python backend.py
+```
+
+### Running the Frontend
+```bash
+streamlit run frontend.py
+```
+
+The application will be available at http://localhost:8501
