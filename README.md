@@ -74,7 +74,7 @@ You will be provided with the customer Query:
   "agent_note"     : "<short action recommendation>",
   "confidence"     : "<0-1>",
   "chain_of_thought": "<VERY brief reasoning (≤30 words)>"
-}
+}```
 
 # AI-Powered Customer Portal MVP
 
@@ -90,6 +90,7 @@ This MVP provides three core functionalities:
 ## Technical Architecture
 
 ### Frontend
+![Frontend](assets/task-2_UI.png)
 - **Technology**: Streamlit
 - **Features**:
   - Clean, intuitive UI requiring minimal code
@@ -124,3 +125,166 @@ streamlit run frontend.py
 ```
 
 The application will be available at http://localhost:8501
+
+
+### Task 3: Overview
+
+# Scalable Banking API
+
+This project implements a high-performance, scalable banking transaction API designed to process millions of daily transactions while maintaining data consistency, low latency, and fault tolerance.
+
+## System Architecture
+
+### Core Components
+
+1. **FastAPI Application**
+   - RESTful API endpoints for banking operations
+   - Asynchronous request handling
+   - Input validation and error management
+   - Rate limiting for security and stability
+
+2. **Database Layer**
+   - PostgreSQL with asyncpg driver for non-blocking operations
+   - Transaction isolation and row-level locking
+   - Optimized query patterns
+
+3. **Data Models**
+   - Account management with balance tracking
+   - Transaction history and audit trail
+   - Multi-currency support
+
+## API Endpoints
+
+### 1. Debit Transaction
+**Endpoint:** `POST /transactions/debit`  
+**Description:** Deducts funds from an account  
+**Request Body:**
+```json
+{
+  "account_id": 123,
+  "amount": 100.50
+}
+```
+**Features:**
+- Validation to prevent negative amounts
+- Insufficient funds protection
+- Rate limiting (5 requests per minute)
+- Atomic operations with row-level locking
+
+### 2. Credit Transaction
+**Endpoint:** `POST /transactions/credit`  
+**Description:** Adds funds to an account  
+**Request Body:**
+```json
+{
+  "account_id": 123,
+  "amount": 100.50
+}
+```
+**Features:**
+- Validation to prevent negative amounts
+- Atomic operations with database locking
+- Full transaction audit trail
+
+### 3. Balance Inquiry
+**Endpoint:** `GET /accounts/{account_id}/balance`  
+**Description:** Retrieves current account balance and currency  
+**Response:**
+```json
+{
+  "account_id": 123,
+  "balance": 1500.75,
+  "currency": "USD"
+}
+```
+
+## Technical Implementation
+
+### Database Schema
+
+The system uses two primary tables:
+
+1. **Accounts Table**
+```sql
+CREATE TABLE accounts (
+    id         SERIAL PRIMARY KEY,
+    balance    NUMERIC(14, 2) NOT NULL DEFAULT 0,
+    currency   VARCHAR(3) NOT NULL DEFAULT 'USD',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+2. **Transactions Table**
+```sql
+CREATE TABLE transactions (
+    id         SERIAL PRIMARY KEY,
+    account_id INTEGER NOT NULL REFERENCES accounts(id),
+    type       VARCHAR(10) NOT NULL, -- 'debit' or 'credit'
+    amount     NUMERIC(14, 2) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+### Ensuring Transaction Consistency
+
+1. **Database Transactions**
+   - All operations use SQL transactions with proper isolation levels
+   - Automatic rollback on errors ensures atomicity
+
+2. **Row-Level Locking**
+   - `SELECT FOR UPDATE` ensures exclusive access during balance updates
+   - Prevents race conditions and "lost update" problems
+
+3. **Crash Recovery**
+   - PostgreSQL's Write-Ahead Logging (WAL) ensures durability
+   - Transaction journaling protects against partial commits
+
+### Performance Optimizations
+
+1. **Asynchronous Processing**
+   - Non-blocking I/O with asyncpg and FastAPI
+   - Connection pooling for reduced connection overhead
+
+2. **Query Optimization**
+   - Minimal database round-trips
+   - Indexed fields for common access patterns
+   - Optimized SELECT queries with minimal field selection
+
+3. **Caching Strategy**
+   - Potential for Redis-based balance caching (implementation ready)
+   - TTL-based invalidation on transaction processing
+
+4. **Horizontal Scaling**
+   - Stateless API design allows for multiple instances
+   - Database connection pooling across instances
+
+## Concurrency Safety
+
+The implementation addresses concurrency challenges through:
+
+1. **Pessimistic Locking**
+   - Row-level locks prevent simultaneous updates to the same account
+   - Deadlock prevention through consistent lock acquisition order
+
+2. **Transaction Isolation**
+   - Serializable isolation level for critical operations
+   - Read Committed for balance inquiries
+
+3. **Rate Limiting**
+   - Prevents API abuse
+   - Stabilizes system under high load
+
+## Error Handling
+
+The API provides detailed error responses:
+
+1. **HTTP Status Codes**
+   - 404: Account not found
+   - 400: Invalid input or insufficient funds
+   - 500: System errors with detailed logging
+
+2. **Error Messages**
+   - User-friendly error descriptions
+   - Internal error logging for debugging
+

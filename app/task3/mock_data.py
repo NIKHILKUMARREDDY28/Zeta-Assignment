@@ -3,9 +3,9 @@ import random
 from datetime import datetime, timedelta
 from decimal import Decimal
 
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-from app.db_connection import DATABASE_URL, Account, Transaction, Base
+from app.task3.db_connection import DATABASE_URL, Account, Transaction, Base
 
 
 engine = create_async_engine(DATABASE_URL, echo=True)

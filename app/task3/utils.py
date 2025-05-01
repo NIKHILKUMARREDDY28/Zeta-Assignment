@@ -10,7 +10,6 @@ def rate_limiter(limit: int = 5, period: int = 1):
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, request: Request = None, **kwargs):
-            # Get user identifier (could be from auth token, IP, etc.)
             if request:
                 user_id = request.headers.get('X-User-ID', request.client.host)
             else:
